@@ -1,0 +1,5 @@
+1. transcription of speech audio
+2. check the transciption with ground truth (optional)
+3. if correct (optional) then perform VAD
+4. split audio word by word 
+5. save speech audio word by word based on transcription in separate directories (for a sample) and files (for a word)
