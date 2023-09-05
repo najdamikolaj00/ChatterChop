@@ -1,6 +1,13 @@
+"""This file contains functions that can be used to perform audio transcriptions and additional utilities."""
+
 import os
 import whisper
-from evaluate import load
+
+from .utils import (
+    text_normalization,
+    create_edit_matrix,
+    levenshtein_distance
+)
 
 def whisper_transcription(path_to_audio_file: str, model_name: str = 'small', language: str = 'pl') -> dict:
     """
@@ -65,11 +72,10 @@ def transcription_into_list(transcription_result: dict) -> list:
     """
     try:
         text = transcription_result['text'].read()
-        text = text.strip()
-        text = ''.join(char.lower() if char.isalnum() or char.isspace() else ' ' for char in text)
-        one_long_sentence = ' '.join(text.split())
+        one_long_sentence = text_normalization(text)
         sentence_list = [one_long_sentence]
         return sentence_list
+    
     except FileNotFoundError:
         print(f"Transcription not found: returning empty list.")
         return []
@@ -89,16 +95,14 @@ def txt_into_list(path_to_text: str) -> list:
     try:
         with open(path_to_text, 'r', encoding='utf-8') as file:
             text = file.read()
-            text = text.strip()
-            text = ''.join(char.lower() if char.isalnum() or char.isspace() else ' ' for char in text)
-            one_long_sentence = ' '.join(text.split())
+            one_long_sentence = text_normalization(text)
             sentence_list = [one_long_sentence]
             return sentence_list
     except FileNotFoundError:
         print(f"File not found: {path_to_text}")
         return []
 
-def wer_metric(transcription_result, ground_truth):
+def wer_metric(transcription_result: list, ground_truth: list) -> float:
     """
     Function calculates Word Error Rate (WER) https://en.wikipedia.org/wiki/Word_error_rate.
     
@@ -113,27 +117,16 @@ def wer_metric(transcription_result, ground_truth):
     ref_tokens = transcription_result.split()
     hyp_tokens = ground_truth.split()
 
-    edit_matrix = [[0] * (len(hyp_tokens) + 1) for _ in range(len(ref_tokens) + 1)]
 
-    for i in range(len(ref_tokens) + 1):
-        edit_matrix[i][0] = i
-    for j in range(len(hyp_tokens) + 1):
-        edit_matrix[0][j] = j
+    edit_matrix = create_edit_matrix(ref_tokens, hyp_tokens)
+    
+    levenshtein_matrix = levenshtein_distance(ref_tokens, hyp_tokens, edit_matrix)
 
-    for i in range(1, len(ref_tokens) + 1):
-        for j in range(1, len(hyp_tokens) + 1):
-            cost = 0 if ref_tokens[i - 1] == hyp_tokens[j - 1] else 1
-            edit_matrix[i][j] = min(
-                edit_matrix[i - 1][j] + 1,
-                edit_matrix[i][j - 1] + 1,
-                edit_matrix[i - 1][j - 1] + cost 
-            )
-
-    wer = edit_matrix[len(ref_tokens)][len(hyp_tokens)] / len(ref_tokens)
+    wer = levenshtein_matrix[len(ref_tokens)][len(hyp_tokens)] / len(ref_tokens)
 
     return wer
 
-def cer_metric(transcription_result, ground_truth):
+def cer_metric(transcription_result: list, ground_truth: list) -> float:
     """
     Function calculates Character Error Rate (CER) https://readcoop.eu/glossary/character-error-rate-cer/.
     
@@ -145,28 +138,13 @@ def cer_metric(transcription_result, ground_truth):
         float: Character Error Rate (CER).
 
     """
-    def min_of_three(a, b, c):
-        return min(a, min(b, c))
+    ref_chars = list(ground_truth)
+    hyp_chars = list(transcription_result)
 
-    ref_chars = transcription_result.split()
-    hyp_chars = ground_truth.split()
+    edit_matrix = create_edit_matrix(ref_chars, hyp_chars)
+    
+    levenshtein_matrix = levenshtein_distance(ref_chars, hyp_chars, edit_matrix)
 
-    edit_matrix = [[0] * (len(hyp_chars) + 1) for _ in range(len(ref_chars) + 1)]
-
-    for i in range(len(ref_chars) + 1):
-        edit_matrix[i][0] = i
-    for j in range(len(hyp_chars) + 1):
-        edit_matrix[0][j] = j
-
-    for i in range(1, len(ref_chars) + 1):
-        for j in range(1, len(hyp_chars) + 1):
-            cost = 0 if ref_chars[i - 1] == hyp_chars[j - 1] else 1
-            edit_matrix[i][j] = min_of_three(
-                edit_matrix[i - 1][j] + 1,
-                edit_matrix[i][j - 1] + 1,
-                edit_matrix[i - 1][j - 1] + cost
-            )
-
-    cer = edit_matrix[len(ref_chars)][len(hyp_chars)] / len(ref_chars)
+    cer = levenshtein_matrix[len(ref_chars)][len(hyp_chars)] / len(ref_chars)
 
     return cer
