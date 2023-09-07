@@ -171,13 +171,15 @@ def merge_words(segments, separator="|"):
             i2 += 1
     return words
 
-def get_word_segments(waveform, transcript):
+def run_forced_alignment(waveform, transcript):
 
     model, labels = load_bundle()
-
     emission = generate_frame_wise_probability(waveform, model)
- 
-    normalized_transcript = normalize_transcript_CTC(transcript['text'])
+
+    if transcript is dict:
+        normalized_transcript = normalize_transcript_CTC(transcript['text'])
+    else:
+        normalized_transcript = normalize_transcript_CTC(transcript)
 
     tokens = get_tokens(normalized_transcript, labels)
 
