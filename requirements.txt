@@ -10,3 +10,5 @@ scipy==1.8.1
 webrtcvad==2.0.10
 SpeechRecognition==3.10.0
 matplotlib==3.5.1
+torch==2.0.1
+torchaudio==2.0.2
