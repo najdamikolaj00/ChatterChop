@@ -3,37 +3,46 @@
 import torchaudio
 import os
 
-from .transcription import (
-    whisper_transcription
-)
+from .transcription import WhisperTranscription
 
 from .forced_alignment import (
-    get_word_segments
+    run_forced_alignment
 )
 
 class ChatterChop:
     """
-    Core class of the package, the methods for necessary initialization of audio signal and resampling
-    are provided. 
-    With class initialization user is able to call methods for transcription
-    and forced alignment. 
+    The core class of the package provides the necessary methods for correct usage. 
+    Within a class object initialisation, the user is able to call methods for 
+    transcription and forced alignment.
 
     """
-    def __init__(self, path_to_audio):
+    def __init__(self, path_to_audio, transcript=None):
         """
         Initialize the ChatterChop object.
 
         Args:
-            path (str): Path to the audio file to load.
+            path_to_audio (str): Path to the audio file to load.
+            transcript (str, optional): Path to a transcript file (default is None, then 
+                                        whisper transcription is performed).
         """
         self._waveform = None
         self._sample_rate = None
         self._desired_sample_rate = 16000
+        self.path_to_audio = path_to_audio
         
-        self.load_audio(path_to_audio)
+        self.load_audio(self.path_to_audio)
 
-        self._transcript = whisper_transcription(path_to_audio)
-        self._segments, self._trellis_size_0 = get_word_segments(self._waveform, self._transcript)
+        if transcript is None:
+            whisper_transcriber = WhisperTranscription(self.path_to_audio)
+            self.transcript = whisper_transcriber.whisper_transcription()
+        else:
+            self.transcript = transcript
+
+        if self.transcript is not None and self._waveform is not None:
+            self._segments, self._trellis_size_0 = run_forced_alignment(self._waveform, self.transcript)
+        else:
+            print("Transcript and waveform must be specified")
+
         self._chopped_chatter = []
 
     @property
@@ -85,10 +94,15 @@ class ChatterChop:
         except Exception as e:
             print(f"An error occurred during resampling: {e}")
 
+    def get_transcription(self):
+        """Returns transcription."""
+        return self.transcript
+
     def chop_chatter(self):
         """
-        take speech file and cut it into chunks by segment time frames
-        save it into dict?
+        Takes speech file and cuts it into chunks 
+        by parameters obtained by forced alignment
+
         """
         for i in range(len(self._segments)):
             ratio = self._waveform.size(1)/(self._trellis_size_0 - 1)
@@ -105,7 +119,12 @@ class ChatterChop:
         
     def save_speech_segments(self, output_path):
         """
-        save chopped audio using word as a name of a file.
+        Saves chopped audio in desired output_path using 
+        recognised/transcripted word in uppercase as a filename.
+
+        Args:
+            output_path (str): Path to the specific output directory.
+
         """
         for segment in self._chopped_chatter:
             torchaudio.save(os.path.join(output_path, f'{segment["word"]}.wav'), 
