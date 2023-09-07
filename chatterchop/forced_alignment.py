@@ -11,12 +11,9 @@ import torch
 import torchaudio
 from dataclasses import dataclass
 
-import os
-
 from .utils import (
     check_cuda_availability,
-    waveform_resample_tc,
-    load_audio_tc
+    normalize_transcript_CTC
 )
 
 DEVICE = check_cuda_availability()
@@ -39,7 +36,7 @@ def load_bundle():
 
     return model, labels
 
-def generate_frame_wise_probability(waveform: torch.Tensor, model) -> torch.Tensor:
+def generate_frame_wise_probability(waveform, model):
     """
     Function description
 
@@ -59,9 +56,8 @@ def generate_frame_wise_probability(waveform: torch.Tensor, model) -> torch.Tens
 
     return emission
 
-def get_tokens(transcript: str) -> list[int]:
+def get_tokens(transcript, labels):
 
-    _, labels = load_bundle()
     dictionary = {c: i for i, c in enumerate(labels)}
 
     tokens = [dictionary[c] for c in transcript]
@@ -81,9 +77,6 @@ def generate_alignment_probability(emission, tokens, blank_id=0) -> torch.Tensor
         str: Description.
 
     """
-    emission = generate_frame_wise_probability()
-    tokens = get_tokens()
-
     num_frame = emission.size(0)
     num_tokens = len(tokens)
 
@@ -161,6 +154,7 @@ def merge_repeats(path, transcript):
         i1 = i2
     return segments
 
+
 def merge_words(segments, separator="|"):
     words = []
     i1, i2 = 0, 0
@@ -182,15 +176,17 @@ def get_word_segments(waveform, transcript):
     model, labels = load_bundle()
 
     emission = generate_frame_wise_probability(waveform, model)
+ 
+    normalized_transcript = normalize_transcript_CTC(transcript['text'])
 
-    tokens = get_tokens(transcript)
+    tokens = get_tokens(normalized_transcript, labels)
 
     trellis = generate_alignment_probability(emission, tokens)
 
     path = backtrack(trellis, emission, tokens)
 
-    segments = merge_repeats(path, transcript)
+    segments = merge_repeats(path, normalized_transcript)
 
     word_segments = merge_words(segments)
 
-    return word_segments
+    return word_segments, trellis.size(0)
