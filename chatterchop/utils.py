@@ -3,56 +3,6 @@
 from typing import List
 import re
 import torch
-import torchaudio
-
-def func_template(value: int, text: str, values: list) -> str:
-    """
-    Function description
-
-    Args:
-        value (int): Description.
-        text (str): Description.
-        values (list): Description.
-
-    Returns:
-        str: Description.
-
-    """
-    return 'a'
-
-def load_audio_tc(audio_path: str) -> tuple(torch.Tensor, int):
-    """
-    Loading audio when working with torch.
-
-    Args:
-        audio_path (str): Path to audio file.
-
-    Returns:
-        tuple(torch.Tensor, int): Waveform and sample rate of audio file.
-
-    """
-
-    waveform, sample_rate = torchaudio.load(audio_path)
-    return waveform, sample_rate
-
-def waveform_resample_tc(waveform: torch.Tensor, sample_rate: int, desired_sample_rate: int = 16000) -> torch.Tensor:
-    """
-    Waveform resample function when working with torch.
-
-    Args:
-        waveform (torch.Tensor): Waveform as torch tensor.
-        sample_rate (int): Original sample rate of waveform.
-        desired_sample_rate (int): Desired sample rate for waveform.
-
-    Returns:
-        torch.Tensor: Resampled waveform to the desired sample rate.
-
-    """
-    transform = torchaudio.transforms.Resample(orig_freq = sample_rate,
-                                                new_freq= desired_sample_rate)
-    resampled_waveform = transform(waveform)
-
-    return resampled_waveform
 
 def check_cuda_availability():
     """
@@ -96,6 +46,24 @@ def text_normalization(text: str) -> str:
 
     return one_long_sentence
 
+def normalize_polish_letters(transcript):
+    polish_to_english = str.maketrans({
+    'ą': 'a',
+    'ć': 'c',
+    'ę': 'e',
+    'ł': 'l',
+    'ń': 'n',
+    'ó': 'o',
+    'ś': 's',
+    'ź': 'z',
+    'ż': 'z',
+    })
+    transcript = transcript.lower()
+
+    eng_transcript = transcript.translate(polish_to_english)
+
+    return eng_transcript
+
 def normalize_transcript_CTC(transcript: str) -> str:
     """
     This function performs text normalization for forced alignment.
@@ -112,7 +80,9 @@ def normalize_transcript_CTC(transcript: str) -> str:
     *To do: change numbers to text
         
     """
-    normalized_transcript = re.sub(r'(\w*)[^\w\s]+(\w*)', r'\1 \2', transcript)
+
+    eng_transcript = normalize_polish_letters(transcript)
+    normalized_transcript = re.sub(r'(\w*)[^\w\s]+(\w*)', r'\1 \2', eng_transcript)
     normalized_transcript = '|'.join(word.upper() for word in normalized_transcript.split())
 
     return normalized_transcript
