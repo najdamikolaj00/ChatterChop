@@ -9,7 +9,7 @@ from .forced_alignment import (
     run_forced_alignment
 )
 
-class ChatterChop:
+class ChatterChop(WhisperTranscription):
     """
     The core class of the package provides the necessary methods for correct usage. 
     Within a class object initialisation, the user is able to call methods for 
@@ -30,11 +30,11 @@ class ChatterChop:
         self._desired_sample_rate = 16000
         self.path_to_audio = path_to_audio
         
-        self.load_audio(self.path_to_audio)
+        self._load_audio(self.path_to_audio)
 
         if transcript is None:
-            whisper_transcriber = WhisperTranscription(self.path_to_audio)
-            self.transcript = whisper_transcriber.whisper_transcription()
+            self.transcript = self.whisper_transcription()
+            print(type(self.transcript))
         else:
             self.transcript = transcript
 
@@ -55,9 +55,11 @@ class ChatterChop:
         """Property to get the sample rate."""
         return self._sample_rate
 
-    def load_audio(self, path):
+    def _load_audio(self, path):
         """
-        Load audio from a file, and optionally resample it if needed.
+        Load audio from a file and optionally resample it if necessary.
+        The preferred sampling rate is 16kHz due to the sampling rate of audio
+        data on which the model has been trained.
 
         Args:
             path (str): Path to the audio file to load.
@@ -66,7 +68,7 @@ class ChatterChop:
             self._waveform, self._sample_rate = torchaudio.load(path)
             
             if self._sample_rate != self._desired_sample_rate:
-                self._waveform = self.resample_waveform(self._desired_sample_rate)
+                self._waveform = self._resample_waveform(self._desired_sample_rate)
                 self._sample_rate = self._desired_sample_rate
 
         except FileNotFoundError:
@@ -76,10 +78,10 @@ class ChatterChop:
             print(f"An error occurred while loading audio: {e}")
             self._waveform, self._sample_rate = None, None
 
-    def resample_waveform(self, desired_sample_rate):
+    def _resample_waveform(self, desired_sample_rate):
         """
-        Resample waveform to 16kHz, this is the sample rate needed for forced alignment
-        as the model was trained on audio samples with that frequency sampling.
+        Resample waveform to 16kHz, this is the sample rate preferred for forced 
+        alignment as the model was trained on audio samples with that sampling rate.
 
         Args:
             desired_sample_rate (int): Desired sample rate for waveform.
@@ -100,8 +102,8 @@ class ChatterChop:
 
     def chop_chatter(self):
         """
-        Takes speech file and cuts it into chunks 
-        by parameters obtained by forced alignment
+        Takes a speech file and cuts it into chunks 
+        by time frames obtained by forced alignment.
 
         """
         for i in range(len(self._segments)):
@@ -119,7 +121,7 @@ class ChatterChop:
         
     def save_speech_segments(self, output_path):
         """
-        Saves chopped audio in desired output_path using 
+        Saves chopped audio in desired path using 
         recognised/transcripted word in uppercase as a filename.
 
         Args:
