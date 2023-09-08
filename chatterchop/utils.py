@@ -40,7 +40,6 @@ def text_normalization(text):
     *To do: change numbers to text
         
     """
-    print(text, type(text))
     text = text.strip()
     text = ''.join(char.lower() if char.isalnum() or char.isspace() else ' ' for char in text)
     one_long_sentence = ' '.join(text.split())
@@ -221,7 +220,6 @@ def cer_metric(transcription_result, ground_truth):
 
     ref_chars = list(ground_truth)
     hyp_chars = list(transcription_result)
-    print(ref_chars, hyp_chars)
 
     edit_matrix = create_edit_matrix(ref_chars, hyp_chars)
     
