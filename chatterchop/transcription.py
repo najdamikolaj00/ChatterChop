@@ -1,9 +1,10 @@
-"""This file contains functions that can be used to perform audio transcriptions and additional utilities."""
+"""This file contains functions used to perform audio transcriptions and additional utilities."""
 import whisper
 
 from .utils import (
     wer_metric,
-    cer_metric
+    cer_metric,
+    transcription_into_txt
 )
 
 class WhisperTranscription:
@@ -32,27 +33,28 @@ class WhisperTranscription:
 
         try:
             self.transcription_result = model.transcribe(self.path_to_audio, language=language)
-            return self.transcription_result['text']
+            self.transcription_result = self.transcription_result['text']
+            return self.transcription_result
         except Exception as e:
             return {"error": f"Transcription failed: {str(e)}"}
-        
-    def get_transcription(self):
-        """Returns transcription."""
-        return self.transcription_result['text']
-    
+            
     def get_transcription_accuracy(self, ground_truth):
         """
         Returns transcription accuracy based on WER and CER metric.
             Args:
-                ground_truth (list): The one element's list with a ground truth.
+                ground_truth (str): Path to file containing ground truth.
 
-            Returns:
-                print(WER and CER results in %)
+            Prints:
+                WER and CER results in % or None if didn't meet the requirements. 
         """
         if self.transcription_result is not None:
-            wer = wer_metric(self.get_transcription, ground_truth)
-            cer = cer_metric(self.get_transcription, ground_truth)
+            wer = wer_metric(self.transcription_result, ground_truth)
+            cer = cer_metric(self.transcription_result, ground_truth)
 
             print(f"WER: {wer*100:.2f}%, CER:{cer*100:.2f}%")
         else:
             print("None")
+
+    def save_transcription(self, txt_path):
+        """Function that writes transcription into a text file."""
+        return transcription_into_txt(self.transcription_result, txt_path)
