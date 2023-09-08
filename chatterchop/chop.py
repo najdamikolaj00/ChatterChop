@@ -34,7 +34,6 @@ class ChatterChop(WhisperTranscription):
 
         if transcript is None:
             self.transcript = self.whisper_transcription()
-            print(type(self.transcript))
         else:
             self.transcript = transcript
 
