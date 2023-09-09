@@ -10,6 +10,7 @@ International Conference on Speech and Computer. Cham: Springer International Pu
 import torch
 import torchaudio
 from dataclasses import dataclass
+import os
 
 from .utils import (
     check_cuda_availability,
@@ -176,8 +177,10 @@ def run_forced_alignment(waveform, transcript):
     model, labels = load_bundle()
     emission = generate_frame_wise_probability(waveform, model)
 
-    if transcript is dict:
-        normalized_transcript = normalize_transcript_CTC(transcript['text'])
+    if os.path.isfile(transcript):
+        with open(transcript, 'r', encoding='utf-8') as f:
+            transcript = f.read()
+            normalized_transcript = normalize_transcript_CTC(transcript)
     else:
         normalized_transcript = normalize_transcript_CTC(transcript)
 
