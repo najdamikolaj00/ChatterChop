@@ -4,9 +4,7 @@ import re
 import torch
 import os
 
-polish_to_english = str.maketrans({'ą': 'a', 'ć': 'c', 'ę': 'e', 
-                                       'ł': 'l', 'ń': 'n', 'ó': 'o', 
-                                       'ś': 's','ź': 'z', 'ż': 'z',})
+polish_letters = {'ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ź', 'ż'}
 
 def check_cuda_availability():
     """
@@ -65,8 +63,9 @@ def normalize_polish_to_english(transcript):
     *To do: change numbers to text
         
     """
-
-    transcript = transcript.lower()
+    polish_to_english = str.maketrans({'ą': 'a', 'ć': 'c', 'ę': 'e', 
+                                   'ł': 'l', 'ń': 'n', 'ó': 'o', 
+                                   'ś': 's','ź': 'z', 'ż': 'z'})
     return transcript.translate(polish_to_english)
 
 def normalize_transcript_CTC(transcript):
@@ -86,12 +85,13 @@ def normalize_transcript_CTC(transcript):
     *To do: change numbers to text, other languages
         
     """
-    has_polish_letters = any(polish_letter in transcript for polish_letter in polish_to_english)
+    transcript = transcript.lower()
+
+    has_polish_letters = any(polish_letter in transcript for polish_letter in polish_letters)
 
     if has_polish_letters:
         eng_transcript = normalize_polish_to_english(transcript)
-    
-    
+
     normalized_transcript = re.sub(r'(\w*)[^\w\s]+(\w*)', r'\1 \2', eng_transcript)
     normalized_transcript = '|'.join(word.upper() for word in normalized_transcript.split())
 
