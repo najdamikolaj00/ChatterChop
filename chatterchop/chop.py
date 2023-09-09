@@ -141,6 +141,6 @@ class ChatterChop(WhisperTranscription):
             output_path (str): Path to the specific output directory.
 
         """
-        for segment in self._chopped_chatter:
-            torchaudio.save(os.path.join(output_path, f'{segment["word"]}.wav'), 
+        for i, segment in enumerate(self._chopped_chatter):
+            torchaudio.save(os.path.join(output_path, f'{segment["word"]}_{i}.wav'), 
                             segment['audio_segment'], sample_rate=self._desired_sample_rate)
