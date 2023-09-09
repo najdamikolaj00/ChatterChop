@@ -11,7 +11,7 @@ class WhisperTranscription:
     def __init__(self, path_to_audio_file):
 
         self.path_to_audio = path_to_audio_file
-        self.transcription_result = None
+        self.transcription_result = self.transcript
 
     def whisper_transcription(self, model_name='small', language='pl'):
         """
@@ -38,7 +38,7 @@ class WhisperTranscription:
         except Exception as e:
             return {"error": f"Transcription failed: {str(e)}"}
             
-    def get_transcription_accuracy(self, ground_truth):
+    def transcription_accuracy(self, transcription, ground_truth):
         """
         Returns transcription accuracy based on WER and CER metric.
             Args:
@@ -47,9 +47,9 @@ class WhisperTranscription:
             Prints:
                 WER and CER results in % or None if didn't meet the requirements. 
         """
-        if self.transcription_result is not None:
-            wer = wer_metric(self.transcription_result, ground_truth)
-            cer = cer_metric(self.transcription_result, ground_truth)
+        if transcription is not None:
+            wer = wer_metric(transcription, ground_truth)
+            cer = cer_metric(transcription, ground_truth)
 
             print(f"WER: {wer*100:.2f}%, CER:{cer*100:.2f}%")
         else:
