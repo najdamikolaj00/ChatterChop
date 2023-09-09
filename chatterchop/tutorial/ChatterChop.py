@@ -2,9 +2,50 @@
 
 import sys
 sys.path.append(r'd:\ChatterChop')
-
 from chatterchop.chop import ChatterChop
 import os
+
+def speech_chop():
+    """
+    When the path to audio is provided without forced any transcription file 
+    the transcription is performed using OpenAI Whisper. 
+    
+    1st Example (Polish):
+        The object is called with the path to the audio file. Then the audio is cut and
+    segments to the desired directory. New audio segments are identified by
+    and the word position in an utterance.
+
+    test_audio_path_pl - path to Polish audio file.
+    output_dir_pl - path to output directory.
+
+    2nd Example (English):
+        The object is called with the path to the audio file. Then the audio is cut and
+    segments to the desired directory. New audio segments are identified by
+    and the word position in an utterance.
+
+    test_audio_path_eng - path to English audio file.
+    output_dir_eng - path to output directory.
+
+    """
+    #1st Example:
+    test_audio_path_pl = 'data_to_test/test_pl/test_audio_pl.wav'
+    output_dir_pl = 'data_to_test/test_pl/test_split_pl'
+
+    test_obj_pl = ChatterChop(test_audio_path_pl)
+
+    test_obj_pl.chop_chatter()
+
+    test_obj_pl.save_speech_segments(output_dir_pl)
+
+    #2nd Example:
+    test_audio_path_eng = 'data_to_test/test_eng/test_audio_eng.wav'
+    output_dir_eng = 'data_to_test/test_eng/test_split_eng'
+
+    test_obj_eng = ChatterChop(test_audio_path_eng)
+
+    test_obj_eng.chop_chatter()
+
+    test_obj_eng.save_speech_segments(output_dir_eng)
 
 def speech_transcription():
     """
@@ -64,4 +105,6 @@ if __name__ == '__main__':
 
     """
 
-    speech_transcription()
+    #speech_transcription()
+
+    speech_chop()
