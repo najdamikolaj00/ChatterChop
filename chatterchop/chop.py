@@ -5,6 +5,11 @@ import os
 
 from .transcription import WhisperTranscription
 
+from .utils import (
+    is_file_path,
+    reading_a_txt_file
+)
+
 from .forced_alignment import (
     run_forced_alignment
 )
@@ -34,8 +39,8 @@ class ChatterChop(WhisperTranscription):
 
         if transcript is None:
             self.transcript = self.whisper_transcription()
-        else:
-            self.transcript = transcript
+        elif is_file_path(transcript):
+            self.transcript = reading_a_txt_file(transcript)
 
         if self.transcript is not None and self._waveform is not None:
             self._segments, self._trellis_size_0 = run_forced_alignment(self._waveform, self.transcript)
@@ -98,6 +103,15 @@ class ChatterChop(WhisperTranscription):
     def get_transcription(self):
         """Returns transcription."""
         return self.transcript
+    
+    def get_transcription_accuracy(self, ground_truth, transcription=None):
+        """Returns transcription accuracy."""
+        if is_file_path(ground_truth):
+             ground_truth = reading_a_txt_file(ground_truth)
+        if transcription is None:
+            return self.transcription_accuracy(self.transcript, ground_truth)
+        else:
+            return self.transcription_accuracy(transcription, ground_truth)
 
     def chop_chatter(self):
         """
