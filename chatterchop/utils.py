@@ -4,6 +4,10 @@ import re
 import torch
 import os
 
+polish_to_english = str.maketrans({'ą': 'a', 'ć': 'c', 'ę': 'e', 
+                                       'ł': 'l', 'ń': 'n', 'ó': 'o', 
+                                       'ś': 's','ź': 'z', 'ż': 'z',})
+
 def check_cuda_availability():
     """
     Checking if cuda is available.
@@ -61,9 +65,7 @@ def normalize_polish_to_english(transcript):
     *To do: change numbers to text
         
     """
-    polish_to_english = str.maketrans({'ą': 'a', 'ć': 'c', 'ę': 'e', 
-                                       'ł': 'l', 'ń': 'n', 'ó': 'o', 
-                                       'ś': 's','ź': 'z', 'ż': 'z',})
+
     transcript = transcript.lower()
     return transcript.translate(polish_to_english)
 
@@ -84,8 +86,12 @@ def normalize_transcript_CTC(transcript):
     *To do: change numbers to text, other languages
         
     """
+    has_polish_letters = any(polish_letter in transcript for polish_letter in polish_to_english)
 
-    eng_transcript = normalize_polish_to_english(transcript)
+    if has_polish_letters:
+        eng_transcript = normalize_polish_to_english(transcript)
+    
+    
     normalized_transcript = re.sub(r'(\w*)[^\w\s]+(\w*)', r'\1 \2', eng_transcript)
     normalized_transcript = '|'.join(word.upper() for word in normalized_transcript.split())
 
