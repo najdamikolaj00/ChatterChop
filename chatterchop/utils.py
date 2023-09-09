@@ -146,11 +146,10 @@ def txt_into_list(path_to_text):
     punctuation and numbers conversion from a ground truth.
     """
     try:
-        with open(path_to_text, 'r', encoding='utf-8') as file:
-            text = file.read()
-            one_long_sentence = text_normalization(text)
-            sentence_list = [one_long_sentence]
-            return sentence_list
+        text = reading_a_txt_file(path_to_text)
+        one_long_sentence = text_normalization(text)
+        sentence_list = [one_long_sentence]
+        return sentence_list
     except FileNotFoundError:
         print(f"File not found: {path_to_text}")
         return []
@@ -188,9 +187,6 @@ def wer_metric(transcription_result, ground_truth):
         float: Word Error Rate (WER).
 
     """
-    if ground_truth.endswith('.txt'):
-        ground_truth = txt_into_str(ground_truth)
-
     ref_tokens = transcription_result.split()
     hyp_tokens = ground_truth.split()
  
@@ -290,4 +286,13 @@ def levenshtein_distance(reference, hypothesis, matrix):
             )
     return matrix
 
+def is_file_path(path):
+    """Checks if the path contains a file."""
+    return os.path.isfile(path)
+
+def reading_a_txt_file(path):
+    """Returns a text."""
+    with open(path, 'r', encoding='utf-8') as f:
+        text = f.read()
+    return text
 
