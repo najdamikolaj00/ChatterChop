@@ -1,7 +1,7 @@
 <div align="center">
     <img src="Logo/ChatChop_logo.png" alt="ChatterChop Logo" style="width: 500px; height: auto; vertical-align: middle; display: inline-block; margin-bottom: -20px;" />
     <p>Package designed for word-level audio segmentation. It combines two techniques, <a href="https://github.com/openai/whisper">Whisper Transcription</a> and
-<a href="https://pytorch.org/audio/stable/tutorials/forced_alignment_tutorial.html">PyTorch-based forced alignment</a>.  <i>Prepared based on necessary utilities for my research. <i></p>
+<a href="https://pytorch.org/audio/stable/tutorials/forced_alignment_tutorial.html">PyTorch-based forced alignment</a>.  <i>Prepared based on the utilities I needed to research. <i></p>
 </div>
 <h2>🎤 Installation 🎤</h2> 
 
