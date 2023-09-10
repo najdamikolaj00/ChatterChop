@@ -26,6 +26,23 @@ Alternatively,
 ```python
 from chatterchop.chop import ChatterChop
 
+#Polish example: Create an object with a path to audio, and provide a path to the output directory to save segmented samples.
+
+test_audio_path_pl = 'data_to_test/test_pl/test_audio_pl.wav'
+output_dir_pl = 'data_to_test/test_pl/test_split_pl'
+
+test_obj_pl = ChatterChop(test_audio_path_pl)
+
+test_obj_pl.chop_chatter()
+
+test_obj_pl.save_speech_segments(output_dir_pl)
+
+```
+<h3>Example 2</h3> 
+
+```python
+from chatterchop.chop import ChatterChop
+
 test_audio_path = 'data_to_test/test_audio_pl_shorter.wav'
 test_ground_truth_path = 'data_to_test/test_transcription_ground_truth.txt'
 
@@ -38,14 +55,14 @@ print(transcription_result)
 
 test_obj_1.save_transcription('data_to_test/saved_trans.txt')
 
-#Option 2: Create an object with a path to audio and to transcription, and provide a ground truth transcript as a path to a file, get transcription accuracy.
+#Option 2: Create an object with a path to audio and transcription, and provide a ground truth transcript as a path to a file to get transcription accuracy.
 test_obj_2 = ChatterChop(test_audio_path, test_transcription_file)
 
 
 transcription_result = test_obj_2.get_transcription_accuracy(test_ground_truth_path)
 print(transcription_result)
 
-#Option 3: Create an object with a path to audio and to transcription, and provide a ground truth transcript as a string, get transcription accuracy.
+#Option 3: Create an object with a path to audio and transcription, and provide a ground truth transcript as a string to get transcription accuracy.
 test_obj_3 = ChatterChop(test_audio_path, test_transcription_file)
 
 test_ground_truth = 'Warszawa jest pełnym sprzeczności przez wielu niezniszczalnym.'
@@ -53,3 +70,8 @@ transcription_result = test_obj_3.get_transcription_accuracy(test_ground_truth)
 print(transcription_result)
 
 ```
+<h3>TO DO:</h3>
+-Tests
+-Other languages
+-Converting numbers to appropriate words
+-Different use cases etc.
