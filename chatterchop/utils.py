@@ -91,6 +91,8 @@ def normalize_transcript_CTC(transcript):
 
     if has_polish_letters:
         eng_transcript = normalize_polish_to_english(transcript)
+    else:
+        eng_transcript = transcript
 
     normalized_transcript = re.sub(r'(\w*)[^\w\s]+(\w*)', r'\1 \2', eng_transcript)
     normalized_transcript = '|'.join(word.upper() for word in normalized_transcript.split())

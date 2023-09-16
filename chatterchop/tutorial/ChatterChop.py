@@ -28,24 +28,24 @@ def speech_chop():
 
     """
     #1st Example:
-    test_audio_path_pl = 'data_to_test/test_pl/test_audio_pl.wav'
-    output_dir_pl = 'data_to_test/test_pl/test_split_pl'
+    # test_audio_path_pl = 'data_to_test/test_pl/test_audio_pl.wav'
+    # output_dir_pl = 'data_to_test/test_pl/test_split_pl'
 
-    test_obj_pl = ChatterChop(test_audio_path_pl)
+    # test_obj_pl = ChatterChop(test_audio_path_pl)
 
-    test_obj_pl.chop_chatter()
+    # test_obj_pl.chop_chatter()
 
-    test_obj_pl.save_speech_segments(output_dir_pl)
+    # test_obj_pl.save_speech_segments(output_dir_pl)
 
     #2nd Example:
-    # test_audio_path_eng = 'data_to_test/test_eng/test_audio_eng.wav'
-    # output_dir_eng = 'data_to_test/test_eng/test_split_eng'
+    test_audio_path_eng = 'data_to_test/test_eng/test_audio_eng.wav'
+    output_dir_eng = 'data_to_test/test_eng/test_split_eng'
 
-    # test_obj_eng = ChatterChop(test_audio_path_eng)
+    test_obj_eng = ChatterChop(path_to_audio=test_audio_path_eng, language='en')
 
-    # test_obj_eng.chop_chatter()
+    test_obj_eng.chop_chatter()
 
-    # test_obj_eng.save_speech_segments(output_dir_eng)
+    test_obj_eng.save_speech_segments(output_dir_eng)
 
 def speech_transcription():
     """

@@ -21,7 +21,7 @@ class ChatterChop(WhisperTranscription):
     transcription and forced alignment.
 
     """
-    def __init__(self, path_to_audio, transcript=None):
+    def __init__(self, path_to_audio, transcript=None, language=None):
         """
         Initialize the ChatterChop object.
 
@@ -34,11 +34,12 @@ class ChatterChop(WhisperTranscription):
         self._sample_rate = None
         self._desired_sample_rate = 16000
         self.path_to_audio = path_to_audio
+        self.language = language
         
         self._load_audio(self.path_to_audio)
 
         if transcript is None:
-            self.transcript = self.whisper_transcription()
+            self.transcript = self.whisper_transcription(language=self.language)
         elif is_file_path(transcript):
             self.transcript = reading_a_txt_file(transcript)
 

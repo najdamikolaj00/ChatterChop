@@ -13,7 +13,7 @@ class WhisperTranscription:
         self.path_to_audio = path_to_audio_file
         self.transcription_result = self.transcript
 
-    def whisper_transcription(self, model_name='small', language='pl'):
+    def whisper_transcription(self, language, model_name='small'):
         """
         Given a path to an audio file, perform transcription and return transcription result. 
         OpenAI Whisper Copyright (c) 2022 OpenAI https://github.com/openai/whisper on MIT LICENSE
