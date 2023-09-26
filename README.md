@@ -11,13 +11,19 @@ pip install chatterchop
 ```
 Alternatively,
 * Clone the repo: `git clone https://github.com/najdamikolaj00/ChatterChop.git`
-* Navigate into the repo: `cd chatterchop`
+* Navigate to the repo: `cd chatterchop`
 * Install the repo: `pip3 install .`
-<h2> Showcase <h2>
-    
+[<h2> Showcase (short words such as "the" need a bit of work)<h2>
 
-https://github.com/najdamikolaj00/ChatterChop/assets/62188847/68b9e925-1ac2-4c5f-a722-03cdc4ade369
+https://github.com/najdamikolaj00/ChatterChop/assets/62188847/faa4012a-6b34-4999-8227-35fb2da7c4dc
 
+https://github.com/najdamikolaj00/ChatterChop/assets/62188847/35e75e45-3ec5-4cc1-ba80-938892459305
+
+https://github.com/najdamikolaj00/ChatterChop/assets/62188847/cbcf1ebc-2223-480e-b1c6-b68a0701cf4a
+
+https://github.com/najdamikolaj00/ChatterChop/assets/62188847/09181b60-4963-4887-9ca1-819522f9079b
+
+and so on...
 
 <h2>🐊 Tutorial 🐊</h2> 
 
