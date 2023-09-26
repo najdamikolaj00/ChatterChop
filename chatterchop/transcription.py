@@ -53,7 +53,7 @@ class WhisperTranscription:
 
             print(f"WER: {wer*100:.2f}%, CER:{cer*100:.2f}%")
         else:
-            print("None")
+            print("The transcription is not available.")
 
     def save_transcription(self, txt_path):
         """Function that writes transcription into a text file."""
