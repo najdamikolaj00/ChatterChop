@@ -43,11 +43,6 @@ class ChatterChop(WhisperTranscription):
         elif is_file_path(transcript):
             self.transcript = reading_a_txt_file(transcript)
 
-        if self.transcript is not None and self._waveform is not None:
-            self._segments, self._trellis_size_0 = run_forced_alignment(self._waveform, self.transcript)
-        else:
-            print("Transcript and waveform must be specified")
-
         self._chopped_chatter = []
 
     @property
@@ -117,21 +112,26 @@ class ChatterChop(WhisperTranscription):
     def chop_chatter(self):
         """
         Takes a speech file and cuts it into chunks 
-        by time frames obtained by forced alignment.
+        using time frames obtained by forced alignment.
 
         """
-        for i in range(len(self._segments)):
-            ratio = self._waveform.size(1)/(self._trellis_size_0 - 1)
-            word = self._segments[i]
-            x0 = int(ratio * word.start)
-            x1 = int(ratio * word.end)
+        if self.transcript is not None and self._waveform is not None:
+            self._segments, self._trellis_size_0 = run_forced_alignment(self._waveform, self.transcript)
+            
+            for i in range(len(self._segments)):
+                ratio = self._waveform.size(1)/(self._trellis_size_0 - 1)
+                word = self._segments[i]
+                x0 = int(ratio * word.start)
+                x1 = int(ratio * word.end)
 
-            entry = {
-                'word': word.label,
-                'audio_segment': self._waveform[:, x0:x1]
-            }
+                entry = {
+                    'word': word.label,
+                    'audio_segment': self._waveform[:, x0:x1]
+                }
 
-            self._chopped_chatter.append(entry)
+                self._chopped_chatter.append(entry)
+        else:
+            print("Transcript and waveform must be specified")
         
     def save_speech_segments(self, output_path):
         """
