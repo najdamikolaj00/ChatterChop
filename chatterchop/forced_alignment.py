@@ -58,62 +58,81 @@ def generate_frame_wise_probability(waveform, model):
     return emission
 
 def get_tokens(transcript, labels):
+    """
+    Convert a transcript into a sequence of token indices using a given label dictionary.
 
+    Args:
+        transcript (str): The transcript to convert into tokens.
+        labels (list): A list of label characters.
+
+    Returns:
+        tokens (list): A list of token indices.
+    """
     dictionary = {c: i for i, c in enumerate(labels)}
-
     tokens = [dictionary[c] for c in transcript]
-
     return tokens
 
 def generate_alignment_probability(emission, tokens, blank_id=0) -> torch.Tensor:
     """
-    Function description
+    Generate an alignment probability matrix using Viterbi algorithm.
 
     Args:
-        value (int): Description.
-        text (str): Description.
-        values (list): Description.
+        emission (torch.Tensor): Frame-wise emission probabilities.
+        tokens (list): A list of token indices.
+        blank_id (int): Index of the blank token.
 
     Returns:
-        str: Description.
-
+        trellis (torch.Tensor): The alignment probability trellis.
     """
     num_frame = emission.size(0)
     num_tokens = len(tokens)
-
     trellis = torch.empty((num_frame + 1, num_tokens + 1))
     trellis[0, 0] = 0
     trellis[1:, 0] = torch.cumsum(emission[:, 0], 0)
     trellis[0, -num_tokens:] = -float("inf")
     trellis[-num_tokens:, 0] = float("inf")
-
     for t in range(num_frame):
         trellis[t + 1, 1:] = torch.maximum(
             trellis[t, 1:] + emission[t, blank_id],
             trellis[t, :-1] + emission[t, tokens],
         )
-
     return trellis
 
 @dataclass
 class Point:
+    """
+    Represents a point in the alignment path.
+
+    Attributes:
+        token_index (int): Index of the token.
+        time_index (int): Index of the time/frame.
+        score (float): Score associated with the alignment point.
+    """
     token_index: int
     time_index: int
     score: float
 
 def backtrack(trellis, emission, tokens, blank_id=0):
+    """
+    Backtrack through the alignment trellis to find the optimal alignment path.
 
+    Args:
+        trellis (torch.Tensor): The alignment probability trellis.
+        emission (torch.Tensor): Frame-wise emission probabilities.
+        tokens (list): A list of token indices.
+        blank_id (int): Index of the blank token.
+
+    Returns:
+        path (list): The optimal alignment path represented as a list of Point objects.
+    """
     j = trellis.size(1) - 1
     t_start = torch.argmax(trellis[:, j]).item()
-
     path = []
     for t in range(t_start, 0, -1):
         stayed = trellis[t - 1, j] + emission[t - 1, blank_id]
         changed = trellis[t - 1, j - 1] + emission[t - 1, tokens[j - 1]]
-
         prob = emission[t - 1, tokens[j - 1] if changed > stayed else 0].exp().item()
         path.append(Point(j - 1, t - 1, prob))
-
         if changed > stayed:
             j -= 1
             if j == 0:
@@ -124,6 +143,19 @@ def backtrack(trellis, emission, tokens, blank_id=0):
 
 @dataclass
 class Segment:
+    """
+    Represents a segment of the alignment with label, start, end, and score.
+
+    Attributes:
+        label (str): Label of the segment.
+        start (int): Start index of the segment.
+        end (int): End index of the segment.
+        score (float): Score associated with the segment.
+
+    Methods:
+        __repr__: Returns a string representation of the segment.
+        length: Returns the length of the segment.
+    """
     label: str
     start: int
     end: int
@@ -136,8 +168,17 @@ class Segment:
     def length(self):
         return self.end - self.start
 
-
 def merge_repeats(path, transcript):
+    """
+    Merge repeated tokens in the alignment path to create segments.
+
+    Args:
+        path (list): The alignment path represented as a list of Point objects.
+        transcript (str): The original transcript.
+
+    Returns:
+        segments (list): A list of Segment objects representing merged segments.
+    """
     i1, i2 = 0, 0
     segments = []
     while i1 < len(path):
@@ -155,8 +196,17 @@ def merge_repeats(path, transcript):
         i1 = i2
     return segments
 
-
 def merge_words(segments, separator="|"):
+    """
+    Merge consecutive segments with the same label into words.
+
+    Args:
+        segments (list): A list of Segment objects.
+        separator (str): Separator to use between merged segments.
+
+    Returns:
+        words (list): A list of merged word segments.
+    """
     words = []
     i1, i2 = 0, 0
     while i1 < len(segments):
@@ -172,26 +222,32 @@ def merge_words(segments, separator="|"):
             i2 += 1
     return words
 
-def run_forced_alignment(waveform, transcript):
+def run_forced_alignment(waveform, transcript_file):
+    """
+    Run forced alignment on an audio waveform with a transcript.
 
+    Args:
+        waveform (torch.Tensor): The audio waveform data.
+        transcript_file (str): Path to the transcript file or the transcript text.
+
+    Returns:
+        word_segments (list): A list of word segments with timing information.
+        trellis_size (int): The size of the alignment trellis.
+    """
     model, labels = load_bundle()
     emission = generate_frame_wise_probability(waveform, model)
 
-    if os.path.isfile(transcript):
-        with open(transcript, 'r', encoding='utf-8') as f:
+    if os.path.isfile(transcript_file):
+        with open(transcript_file, 'r', encoding='utf-8') as f:
             transcript = f.read()
-            normalized_transcript = normalize_transcript_CTC(transcript)
     else:
-        normalized_transcript = normalize_transcript_CTC(transcript)
+        transcript = transcript_file
 
+    normalized_transcript = normalize_transcript_CTC(transcript)
     tokens = get_tokens(normalized_transcript, labels)
-
     trellis = generate_alignment_probability(emission, tokens)
-
     path = backtrack(trellis, emission, tokens)
-
     segments = merge_repeats(path, normalized_transcript)
-
     word_segments = merge_words(segments)
 
     return word_segments, trellis.size(0)
