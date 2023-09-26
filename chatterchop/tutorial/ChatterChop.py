@@ -27,7 +27,7 @@ def speech_chop():
     output_dir_eng - path to output directory.
 
     """
-    #1st Example:
+    #1st Example (PL):
     # test_audio_path_pl = 'data_to_test/test_pl/test_audio_pl.wav'
     # output_dir_pl = 'data_to_test/test_pl/test_split_pl'
 
@@ -37,7 +37,7 @@ def speech_chop():
 
     # test_obj_pl.save_speech_segments(output_dir_pl)
 
-    #2nd Example:
+    #2nd Example (ENG):
     test_audio_path_eng = 'data_to_test/test_eng/test_audio_eng.wav'
     output_dir_eng = 'data_to_test/test_eng/test_split_eng'
 
@@ -71,17 +71,16 @@ def speech_transcription():
 
     """
     
-    test_audio_path = 'data_to_test/test_audio_pl_shorter.wav'
-    test_ground_truth_path = 'data_to_test/test_transcription_ground_truth.txt'
-    test_transcription_file = 'data_to_test/test_transcription.txt'
+    test_audio_path = 'data_to_test/test_eng/test_audio_eng.wav'
+    test_ground_truth_path = 'data_to_test/test_eng/test_transcription_ground_truth_eng.txt'
+    test_transcription_file = 'data_to_test/test_eng/test_transcription_eng.txt'
     #1st Example:
-    # test_obj_1 = ChatterChop(test_audio_path)
+    test_obj_1 = ChatterChop(test_audio_path)
 
+    transcription_result = test_obj_1.get_transcription_accuracy(test_ground_truth_path)
+    print(transcription_result)
 
-    # transcription_result = test_obj_1.get_transcription_accuracy(test_ground_truth_path)
-    # print(transcription_result)
-
-    # test_obj_1.save_transcription('data_to_test/saved_trans.txt')
+    test_obj_1.save_transcription('data_to_test/test_eng/saved_trans_eng.txt')
 
 
     #2nd Example:
@@ -92,11 +91,11 @@ def speech_transcription():
     # print(transcription_result)
 
     #3nd Example:
-    test_obj_3 = ChatterChop(test_audio_path, test_transcription_file)
+    # test_obj_3 = ChatterChop(test_audio_path, test_transcription_file)
 
-    test_ground_truth = 'Warszawa jest pełnym sprzeczności przez wielu niezniszczalnym.'
-    transcription_result = test_obj_3.get_transcription_accuracy(test_ground_truth)
-    print(transcription_result)
+    # test_ground_truth = 'Warszawa jest pełnym sprzeczności przez wielu niezniszczalnym.'
+    # transcription_result = test_obj_3.get_transcription_accuracy(test_ground_truth)
+    # print(transcription_result)
 
 if __name__ == '__main__':
     """
