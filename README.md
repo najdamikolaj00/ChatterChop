@@ -13,6 +13,11 @@ Alternatively,
 * Clone the repo: `git clone https://github.com/najdamikolaj00/ChatterChop.git`
 * Navigate into the repo: `cd chatterchop`
 * Install the repo: `pip3 install .`
+<h2> Showcase <h2>
+    
+
+https://github.com/najdamikolaj00/ChatterChop/assets/62188847/68b9e925-1ac2-4c5f-a722-03cdc4ade369
+
 
 <h2>🐊 Tutorial 🐊</h2> 
 
@@ -21,7 +26,7 @@ Alternatively,
 |   |-- tutorial/
 |   |   |-- ChatterChop.py
 ```
-<h3>Example 1</h3> 
+<h3>Example 1 (chopping chatter;))</h3> 
 
 ```python
 from chatterchop.chop import ChatterChop
@@ -49,7 +54,7 @@ test_obj_eng.chop_chatter()
 test_obj_eng.save_speech_segments(output_dir_eng)
 
 ```
-<h3>Example 2</h3> 
+<h3>Example 2 (getting transcription and metrics)</h3> 
 
 ```python
 from chatterchop.chop import ChatterChop
