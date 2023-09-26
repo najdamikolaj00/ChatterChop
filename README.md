@@ -37,6 +37,17 @@ test_obj_pl.chop_chatter()
 
 test_obj_pl.save_speech_segments(output_dir_pl)
 
+#English example: Create an object with a path to audio, and provide a path to the output directory to save segmented samples.
+
+test_audio_path_eng = 'data_to_test/test_eng/test_audio_eng.wav'
+output_dir_eng = 'data_to_test/test_eng/test_split_eng'
+
+test_obj_eng = ChatterChop(test_audio_path_eng)
+
+test_obj_eng.chop_chatter()
+
+test_obj_eng.save_speech_segments(output_dir_eng)
+
 ```
 <h3>Example 2</h3> 
 
