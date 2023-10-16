@@ -3,6 +3,11 @@
     <p>Package designed for word-level audio segmentation. It combines two techniques, <a href="https://github.com/openai/whisper">Whisper Transcription</a> and
 <a href="https://pytorch.org/audio/stable/tutorials/forced_alignment_tutorial.html">PyTorch forced alignment</a>.  <i>Prepared based on the utilities I needed for my research. <i></p>
 </div>
+<h2>Workflow</h2> 
+<div align="center">
+    <img src="Logo/chatterchop_workflow.png" alt="ChatterChop Workflow" style="width: 800px; height: auto; vertical-align: middle; display: inline-block; margin-bottom: -20px;" />
+</div>
+
 <h2>🎤 Installation 🎤</h2> 
 
 ToDo: Install using pip
