@@ -1,17 +1,17 @@
 """This file contains functions additional utilities for a package."""
 
 import re
+from pathlib import Path
+
 import torch
 import os
 
-polish_letters = {'ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ź', 'ż'}
+polish_letters = {"ą", "ć", "ę", "ł", "ń", "ó", "ś", "ź", "ż"}
 
-def check_cuda_availability():
+
+def check_cuda_availability() -> torch.device:
     """
     Checking if cuda is available.
-
-    Args:
-        None
 
     Returns:
         device
@@ -27,10 +27,11 @@ def check_cuda_availability():
 
     return device
 
-def text_normalization(text):
+
+def text_normalization(text: str) -> str:
     """
-    This function performs text normalization techniques, 
-    to provide a clear representation of text for metrics 
+    This function performs text normalization techniques,
+    to provide a clear representation of text for metrics
     such as WER or CER.
 
     Args:
@@ -40,39 +41,53 @@ def text_normalization(text):
         str: Normalized text as a one long sentence.
 
     *To do: change numbers to text
-        
+
     """
     text = text.strip()
-    text = ''.join(char.lower() if char.isalnum() or char.isspace() else ' ' for char in text)
-    one_long_sentence = ' '.join(text.split())
+    text = "".join(
+        char.lower() if char.isalnum() or char.isspace() else " " for char in text
+    )
+    one_long_sentence = " ".join(text.split())
 
     return one_long_sentence
 
-def normalize_polish_to_english(transcript):
+
+def normalize_polish_to_english(transcript: str) -> str:
     """
-    This function performs the translation of letters from Polish to English 
+    This function performs the translation of letters from Polish to English
     using the provided mapper (polish_to_english) as a reference.
 
     Args:
         transcript (str): Transcript containing Polish letters.
 
     Returns:
-        str: Normalised transcript that contains specified English equivalent 
+        str: Normalised transcript that contains specified English equivalent
         letters in Polish.
 
     *To do: change numbers to text
-        
+
     """
-    polish_to_english = str.maketrans({'ą': 'a', 'ć': 'c', 'ę': 'e', 
-                                   'ł': 'l', 'ń': 'n', 'ó': 'o', 
-                                   'ś': 's','ź': 'z', 'ż': 'z'})
+    polish_to_english = str.maketrans(
+        {
+            "ą": "a",
+            "ć": "c",
+            "ę": "e",
+            "ł": "l",
+            "ń": "n",
+            "ó": "o",
+            "ś": "s",
+            "ź": "z",
+            "ż": "z",
+        }
+    )
     return transcript.translate(polish_to_english)
 
-def normalize_transcript_CTC(transcript):
+
+def normalize_transcript_CTC(transcript: str) -> str:
     """
     This function performs text normalisation for forced alignment.
 
-    Example: 
+    Example:
         transcript: "Nieznaną łąką podąża załamany człowiek."
         normalized: "NIEZNANA|LAKA|PODAZA|ZALAMANY|CZLOWIEK"
 
@@ -83,28 +98,34 @@ def normalize_transcript_CTC(transcript):
         str: Normalized transcript prepared for forced alignment.
 
     *To do: change numbers to text, other languages
-        
+
     """
     transcript = transcript.lower()
 
-    has_polish_letters = any(polish_letter in transcript for polish_letter in polish_letters)
+    has_polish_letters = any(
+        polish_letter in transcript for polish_letter in polish_letters
+    )
 
     if has_polish_letters:
         eng_transcript = normalize_polish_to_english(transcript)
     else:
         eng_transcript = transcript
 
-    normalized_transcript = re.sub(r'(\w*)[^\w\s]+(\w*)', r'\1 \2', eng_transcript)
-    normalized_transcript = '|'.join(word.upper() for word in normalized_transcript.split())
+    normalized_transcript = re.sub(r"(\w*)[^\w\s]+(\w*)", r"\1 \2", eng_transcript)
+    normalized_transcript = "|".join(
+        word.upper() for word in normalized_transcript.split()
+    )
 
     return normalized_transcript
 
-def transcription_into_txt(transcript, txt_path):
+
+def transcription_into_txt(transcript: str, txt_path: str) -> None:
     """
     Function for writing transcription into a text file.
     If the text file or directory doesn't exist, it will be created.
 
     Args:
+        transcript (str): Transcript to save to txt.
         txt_path (str): Path to the text file or directory where it will be created.
 
     Outcome:
@@ -121,27 +142,29 @@ def transcription_into_txt(transcript, txt_path):
     except Exception as e:
         print(f"Error writing to the text file: {str(e)}")
 
-def transcription_into_list(transcript):
+
+def transcription_into_list(transcript: str) -> list[str]:
     """
-    If transcription isn't stored in a list then this function writes transcript to the 
+    If transcription isn't stored in a list then this function writes transcript to the
     list as one string. Needed when the metrics are calculated.
 
     Returns:
         list: The whole transcription in a one element's list.
 
-    *Note: Before calculating any metric it is necessary to perform normalization of capitalization and 
+    *Note: Before calculating any metric it is necessary to perform normalization of capitalization and
     punctuation from a transcription.
     """
     try:
         one_long_sentence = text_normalization(transcript)
         sentence_list = [one_long_sentence]
         return sentence_list
-    
+
     except FileNotFoundError:
         print(f"Transcription not found: returning empty list.")
         return []
 
-def txt_into_list(path_to_text):
+
+def txt_into_list(path_to_text: str) -> list[str]:
     """
     This function converts text file into list and performs preparation for metrics calculation.
 
@@ -154,15 +177,16 @@ def txt_into_list(path_to_text):
     punctuation and numbers conversion from a ground truth.
     """
     try:
-        text = reading_a_txt_file(path_to_text)
+        text = Path(path_to_text).read_text()
         one_long_sentence = text_normalization(text)
         sentence_list = [one_long_sentence]
         return sentence_list
     except FileNotFoundError:
         print(f"File not found: {path_to_text}")
         return []
-    
-def txt_into_str(path_to_text):
+
+
+def txt_into_str(path_to_text: str) -> str:
     """
     This function returns string contained in a file.
 
@@ -175,18 +199,19 @@ def txt_into_str(path_to_text):
     punctuation and numbers conversion from a ground truth.
     """
     try:
-        with open(path_to_text, 'r', encoding='utf-8') as file:
+        with open(path_to_text, "r", encoding="utf-8") as file:
             text = file.read()
             one_long_sentence = text_normalization(text)
             return one_long_sentence
     except FileNotFoundError:
         print(f"File not found: {path_to_text}")
         return ""
-    
-def wer_metric(transcription_result, ground_truth):
+
+
+def wer_metric(transcription_result: str, ground_truth: str) -> float:
     """
     Function calculates Word Error Rate (WER) https://en.wikipedia.org/wiki/Word_error_rate.
-    
+
     Args:
         transcription_result (str): Transcription result.
         ground_truth (str): Path to a file containing the ground truth text.
@@ -197,19 +222,20 @@ def wer_metric(transcription_result, ground_truth):
     """
     ref_tokens = transcription_result.split()
     hyp_tokens = ground_truth.split()
- 
+
     edit_matrix = create_edit_matrix(ref_tokens, hyp_tokens)
-    
+
     levenshtein_matrix = levenshtein_distance(ref_tokens, hyp_tokens, edit_matrix)
 
     wer = levenshtein_matrix[len(ref_tokens)][len(hyp_tokens)] / len(ref_tokens)
 
     return wer
 
-def cer_metric(transcription_result, ground_truth):
+
+def cer_metric(transcription_result: str, ground_truth: str) -> float:
     """
     Function calculates Character Error Rate (CER) https://readcoop.eu/glossary/character-error-rate-cer/.
-    
+
     Args:
         transcription_result (str): Transcription result.
         ground_truth (str): Path to a file containing the ground truth text.
@@ -219,44 +245,29 @@ def cer_metric(transcription_result, ground_truth):
 
     """
 
-    if ground_truth.endswith('.txt'):
+    if ground_truth.endswith(".txt"):
         ground_truth = txt_into_str(ground_truth)
 
     ref_chars = list(ground_truth)
     hyp_chars = list(transcription_result)
 
     edit_matrix = create_edit_matrix(ref_chars, hyp_chars)
-    
+
     levenshtein_matrix = levenshtein_distance(ref_chars, hyp_chars, edit_matrix)
 
     cer = levenshtein_matrix[len(ref_chars)][len(hyp_chars)] / len(ref_chars)
 
     return cer
-    
-def min_of_three(a, b, c):
+
+
+def create_edit_matrix(reference: list, hypothesis: list) -> list:
     """
-    Helper function for WER and CER metrics. 
-    The minimum value of three given values.
-
-    Args:
-        a (any): First value to compare.
-        b (any): Second value to compare.
-        c (any): Third value to compare.
-
-    Returns:
-        any: Description.
-
-    """
-    return min(a, min(b, c))
-
-def create_edit_matrix(reference, hypothesis):
-    """
-    This function creates a matrix that is used to 
+    This function creates a matrix that is used to
     calculate Levenshtein distance.
 
     Args:
         reference (list): The reference text (ground truth).
-        hypothesis (list): The transcription text. 
+        hypothesis (list): The transcription text.
 
     Returns:
         list: Edit matrix.
@@ -271,13 +282,14 @@ def create_edit_matrix(reference, hypothesis):
 
     return edit_matrix
 
-def levenshtein_distance(reference, hypothesis, matrix):
+
+def levenshtein_distance(reference: list, hypothesis: list, matrix: list):
     """
     Function to calculate Levenshtein distance.
 
     Args:
         reference (list): The reference text (ground truth).
-        hypothesis (list): The transcription text. 
+        hypothesis (list): The transcription text.
         matrix (list): Edit matrix to perform Levenshtein distance calculation.
 
     Returns:
@@ -287,20 +299,7 @@ def levenshtein_distance(reference, hypothesis, matrix):
     for i in range(1, len(reference) + 1):
         for j in range(1, len(hypothesis) + 1):
             cost = 0 if reference[i - 1] == hypothesis[j - 1] else 1
-            matrix[i][j] = min_of_three(
-                matrix[i - 1][j] + 1,
-                matrix[i][j - 1] + 1,
-                matrix[i - 1][j - 1] + cost
+            matrix[i][j] = min(
+                matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost
             )
     return matrix
-
-def is_file_path(path):
-    """Checks if the path contains a file."""
-    return os.path.isfile(path)
-
-def reading_a_txt_file(path):
-    """Returns a text."""
-    with open(path, 'r', encoding='utf-8') as f:
-        text = f.read()
-    return text
-

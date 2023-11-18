@@ -7,24 +7,21 @@ Kürzinger, Ludwig, et al. "CTC-segmentation of large corpora for german end-to-
 International Conference on Speech and Computer. Cham: Springer International Publishing, 2020.
 """
 
+import os
+from dataclasses import dataclass
+from typing import Sequence
+
 import torch
 import torchaudio
-from dataclasses import dataclass
-import os
 
-from .utils import (
-    check_cuda_availability,
-    normalize_transcript_CTC
-)
+from .utils import check_cuda_availability, normalize_transcript_CTC
 
 DEVICE = check_cuda_availability()
 
-def load_bundle():
+
+def load_bundle() -> tuple[torch.nn.Module, tuple[str, ...]]:
     """
     Function description
-
-    Args:
-        None
 
     Returns:
         model: Module.
@@ -37,7 +34,10 @@ def load_bundle():
 
     return model, labels
 
-def generate_frame_wise_probability(waveform, model):
+
+def generate_frame_wise_probability(
+    waveform: torch.Tensor, model: torch.nn.Module
+) -> torch.Tensor:
     """
     Function description
 
@@ -45,10 +45,11 @@ def generate_frame_wise_probability(waveform, model):
         waveform (torch.Tensor): Waveform of speech audio.
 
     Returns:
+        model: Module.
         torch.Tensor: Frame wise probability.
 
     """
-  
+
     with torch.inference_mode():
         emissions, _ = model(waveform.to(DEVICE))
         emissions = torch.log_softmax(emissions, dim=-1)
@@ -57,7 +58,8 @@ def generate_frame_wise_probability(waveform, model):
 
     return emission
 
-def get_tokens(transcript, labels):
+
+def get_tokens(transcript: str, labels: Sequence[str]) -> list[int]:
     """
     Convert a transcript into a sequence of token indices using a given label dictionary.
 
@@ -72,7 +74,10 @@ def get_tokens(transcript, labels):
     tokens = [dictionary[c] for c in transcript]
     return tokens
 
-def generate_alignment_probability(emission, tokens, blank_id=0) -> torch.Tensor:
+
+def generate_alignment_probability(
+    emission: torch.Tensor, tokens: list[int], blank_id: int = 0
+) -> torch.Tensor:
     """
     Generate an alignment probability matrix using Viterbi algorithm.
 
@@ -98,6 +103,7 @@ def generate_alignment_probability(emission, tokens, blank_id=0) -> torch.Tensor
         )
     return trellis
 
+
 @dataclass
 class Point:
     """
@@ -108,11 +114,15 @@ class Point:
         time_index (int): Index of the time/frame.
         score (float): Score associated with the alignment point.
     """
+
     token_index: int
     time_index: int
     score: float
 
-def backtrack(trellis, emission, tokens, blank_id=0):
+
+def backtrack(
+    trellis: torch.Tensor, emission: torch.Tensor, tokens: list[int], blank_id: int = 0
+) -> list[Point]:
     """
     Backtrack through the alignment trellis to find the optimal alignment path.
 
@@ -141,6 +151,7 @@ def backtrack(trellis, emission, tokens, blank_id=0):
         raise ValueError("Failed to align")
     return path[::-1]
 
+
 @dataclass
 class Segment:
     """
@@ -156,6 +167,7 @@ class Segment:
         __repr__: Returns a string representation of the segment.
         length: Returns the length of the segment.
     """
+
     label: str
     start: int
     end: int
@@ -168,7 +180,8 @@ class Segment:
     def length(self):
         return self.end - self.start
 
-def merge_repeats(path, transcript):
+
+def merge_repeats(path: list[Point], transcript: str) -> list[Segment]:
     """
     Merge repeated tokens in the alignment path to create segments.
 
@@ -196,7 +209,8 @@ def merge_repeats(path, transcript):
         i1 = i2
     return segments
 
-def merge_words(segments, separator="|"):
+
+def merge_words(segments: list[Segment], separator: str = "|") -> list[Segment]:
     """
     Merge consecutive segments with the same label into words.
 
@@ -214,15 +228,22 @@ def merge_words(segments, separator="|"):
             if i1 != i2:
                 segs = segments[i1:i2]
                 word = "".join([seg.label for seg in segs])
-                score = sum(seg.score * seg.length for seg in segs) / sum(seg.length for seg in segs)
-                words.append(Segment(word, segments[i1].start, segments[i2 - 1].end, score))
+                score = sum(seg.score * seg.length for seg in segs) / sum(
+                    seg.length for seg in segs
+                )
+                words.append(
+                    Segment(word, segments[i1].start, segments[i2 - 1].end, score)
+                )
             i1 = i2 + 1
             i2 = i1
         else:
             i2 += 1
     return words
 
-def run_forced_alignment(waveform, transcript_file):
+
+def run_forced_alignment(
+    waveform: torch.Tensor, transcript_file: str
+) -> tuple[list[Segment], int]:
     """
     Run forced alignment on an audio waveform with a transcript.
 
@@ -238,7 +259,7 @@ def run_forced_alignment(waveform, transcript_file):
     emission = generate_frame_wise_probability(waveform, model)
 
     if os.path.isfile(transcript_file):
-        with open(transcript_file, 'r', encoding='utf-8') as f:
+        with open(transcript_file, "r", encoding="utf-8") as f:
             transcript = f.read()
     else:
         transcript = transcript_file
