@@ -1,6 +1,6 @@
 from pathlib import Path
 
-# from chatterchop.utils import cer_metric, wer_metric
+from chatterchop.utils import cer_metric, wer_metric
 
 
 class Transcription(str):
