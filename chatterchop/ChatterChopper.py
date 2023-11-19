@@ -1,5 +1,4 @@
 """Core ChatterChop class and all the corresponding methods."""
-import os
 from pathlib import Path
 
 from chatterchop.AudioLoader import AudioLoader
@@ -25,9 +24,8 @@ class ChatterChopper:
         Initialize the ChatterChop object.
 
         Args:
-            path_to_audio (str): Path to the audio file to load.
-            transcript (str, optional): Path to a transcript file (default is None, then
-                                        whisper transcription is performed).
+            audio_loader (AudioLoader): Object that loads audio files.
+            whisper_transcriptor (WhisperTranscriptor): Object that transcripts whisper.
         """
         if whisper_transcriptor is None:
             whisper_transcriptor = WhisperTranscriptor()
@@ -46,12 +44,14 @@ class ChatterChopper:
         using time frames obtained by forced alignment.
 
         """
-        self.waveform = self.waveform or self._audio_loader.load_audio(path_to_audio)
-        if os.path.isfile(transcript):
+        if path_to_audio:
+            self.waveform = self._audio_loader.load_audio(path_to_audio)
+        if isinstance(transcript, Path):
             self.transcript = transcript.read_text()
-        self.transcript = self.transcript or self._whisper_transcriptor.transcript(
-            path_to_audio
-        )
+        elif path_to_audio:
+            self.transcript = self._whisper_transcriptor.transcript(
+                path_to_audio
+            )
         chopped_chatter = ChoppedChatter(
             self._audio_loader.desired_sample_rate, self.transcript
         )
