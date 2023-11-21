@@ -38,60 +38,58 @@ Walden, Patrick R (2020), “Perceptual Voice Qualities Database (PVQD)”, Mend
 |   |-- tutorial/
 |   |   |-- ChatterChop.py
 ```
-<h3>Example 1 (chopping chatter;))</h3> 
+<h3>Example 1 (chopping chatter;))</h3>
 
 ```python
-from chatterchop.chop import ChatterChop
+from chatterchop.ChatterChopper import ChatterChopper
 
-#Polish example: Create an object with a path to audio, and provide a path to the output directory to save segmented samples.
+# Polish example: Create an object with a path to audio, and provide a path to the output directory to save segmented samples.
 
 test_audio_path_pl = 'data_to_test/test_pl/test_audio_pl.wav'
 output_dir_pl = 'data_to_test/test_pl/test_split_pl'
 
-test_obj_pl = ChatterChop(test_audio_path_pl)
+test_obj_pl = ChatterChopper(test_audio_path_pl)
 
 test_obj_pl.chop_chatter()
 
 test_obj_pl.save_speech_segments(output_dir_pl)
 
-#English example: Create an object with a path to audio, and provide a path to the output directory to save segmented samples.
+# English example: Create an object with a path to audio, and provide a path to the output directory to save segmented samples.
 
 test_audio_path_eng = 'data_to_test/test_eng/test_audio_eng.wav'
 output_dir_eng = 'data_to_test/test_eng/test_split_eng'
 
-test_obj_eng = ChatterChop(test_audio_path_eng)
+test_obj_eng = ChatterChopper(test_audio_path_eng)
 
 test_obj_eng.chop_chatter()
 
 test_obj_eng.save_speech_segments(output_dir_eng)
 
 ```
-<h3>Example 2 (getting transcription and metrics)</h3> 
+<h3>Example 2 (getting transcription and metrics)</h3>
 
 ```python
-from chatterchop.chop import ChatterChop
+from chatterchop.ChatterChopper import ChatterChopper
 
 test_audio_path = 'data_to_test/test_audio_pl_shorter.wav'
 test_ground_truth_path = 'data_to_test/test_transcription_ground_truth.txt'
 
-#Option 1: Create an object with just a path to audio, and provide a ground truth transcript as a path to a file, get transcription accuracy and save transcription to a text file.
-test_obj_1 = ChatterChop(test_audio_path)
-
+# Option 1: Create an object with just a path to audio, and provide a ground truth transcript as a path to a file, get transcription accuracy and save transcription to a text file.
+test_obj_1 = ChatterChopper(test_audio_path)
 
 transcription_result = test_obj_1.get_transcription_accuracy(test_ground_truth_path)
 print(transcription_result)
 
 test_obj_1.save_transcription('data_to_test/saved_trans.txt')
 
-#Option 2: Create an object with a path to audio and transcription, and provide a ground truth transcript as a path to a file to get transcription accuracy.
-test_obj_2 = ChatterChop(test_audio_path, test_transcription_file)
-
+# Option 2: Create an object with a path to audio and transcription, and provide a ground truth transcript as a path to a file to get transcription accuracy.
+test_obj_2 = ChatterChopper(test_audio_path, test_transcription_file)
 
 transcription_result = test_obj_2.get_transcription_accuracy(test_ground_truth_path)
 print(transcription_result)
 
-#Option 3: Create an object with a path to audio and transcription, and provide a ground truth transcript as a string to get transcription accuracy.
-test_obj_3 = ChatterChop(test_audio_path, test_transcription_file)
+# Option 3: Create an object with a path to audio and transcription, and provide a ground truth transcript as a string to get transcription accuracy.
+test_obj_3 = ChatterChopper(test_audio_path, test_transcription_file)
 
 test_ground_truth = 'Warszawa jest pełnym sprzeczności przez wielu niezniszczalnym.'
 transcription_result = test_obj_3.get_transcription_accuracy(test_ground_truth)
